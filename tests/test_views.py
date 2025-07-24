@@ -101,6 +101,7 @@ class PublicDriverTest(TestCase):
         self.assertNotEqual(res.status_code, 200)
 
 class PrivateDriverTest(TestCase):
+
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="user",
@@ -137,3 +138,19 @@ class PrivateDriverTest(TestCase):
         response = self.client.get(DRIVERS_URL, {"username": "1"})
         self.assertContains(response, "Driver 1")
         self.assertNotContains(response, "Driver 2")
+
+    def test_create_driver(self):
+        form_data = {
+            "first_name": "First",
+            "last_name": "Last",
+            "license_number": "ABC12345",
+            "username": "test_username",
+            "password1": "testpass123",
+            "password2": "testpass123",
+        }
+        self.client.post(reverse("taxi:driver-create"), data=form_data)
+        new_user = get_user_model().objects.get(username=form_data["username"])
+
+        self.assertEqual(new_user.first_name, form_data["first_name"])
+        self.assertEqual(new_user.last_name, form_data["last_name"])
+        self.assertEqual(new_user.license_number, form_data["license_number"])
